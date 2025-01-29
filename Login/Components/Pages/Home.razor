@@ -1,0 +1,16 @@
+﻿@page "/"
+@rendermode InteractiveServer
+<div class="container">
+    <h1>Testando Botão</h1>
+    <button class="btn btn-primary" @onclick="TestarClique">Clique Aqui</button>
+    <p>@mensagem</p>
+</div>
+
+@code {
+    private string mensagem = "Aguardando clique...";
+
+    private void TestarClique()
+    {
+        mensagem = "Botão foi clicado!";
+    }
+}

@@ -1,0 +1,61 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<div class="container mt-5">
+    <h2 class="text-center">Registrar</h2>
+    <form @onsubmit=HandleRegister>
+        <div class="form-group">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" class="form-control" @bind="Username" required />
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="form-control" @bind="Email" required />
+        </div>
+        <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" class="form-control" @bind="Password" required />
+        </div>
+        
+        <p class="text-danger mt-2">@ErrorMessage</p>
+        <button type="submit" class="btn btn-success btn-block mt-3">Registrar</button>
+    </form>    
+</div>
+
+@code {
+    private string Username { get; set; } = string.Empty;
+    private string Email { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private async Task HandleRegister()
+    {
+        try
+        {
+            ErrorMessage = string.Empty;
+            var response = await HttpClient.PostAsJsonAsync("https://localhost:7168/api/account/register", new
+            {
+                UserName = Username,
+                Email = Email,
+                Password = Password
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Redirecione para a página de login após o registro
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                ErrorMessage = "Erro ao registrar o usuário. Tente novamente.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Erro ao realizar o registro. Tente novamente.";
+        }
+    }
+}

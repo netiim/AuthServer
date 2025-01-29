@@ -1,0 +1,36 @@
+﻿@inherits LayoutComponentBase
+
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">Minha Aplicação</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/" @onclick="NavigateToHome">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login" @onclick="NavigateToLogin">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register" @onclick="NavigateToRegister">Registrar</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="mt-4">
+        @Body
+    </main>
+</div>
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    private void NavigateToHome() => NavigationManager.NavigateTo("/");
+    private void NavigateToLogin() => NavigationManager.NavigateTo("/counter");
+    private void NavigateToRegister() => NavigationManager.NavigateTo("/register");
+}

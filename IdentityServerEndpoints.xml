@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AuthServer</name>
+    </assembly>
+    <members>
+        <member name="T:AuthServer.Migrations.InitIdentity">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.InitIdentity.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.InitIdentity.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.InitIdentity.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:AuthServer.Migrations.Criandomedicopaciente">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.Criandomedicopaciente.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.Criandomedicopaciente.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.Criandomedicopaciente.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:AuthServer.Migrations.renomeandotabelas">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.renomeandotabelas.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.renomeandotabelas.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:AuthServer.Migrations.renomeandotabelas.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
