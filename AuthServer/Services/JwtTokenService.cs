@@ -19,12 +19,10 @@ public class JwtTokenService : IJwtTokenService
 
     public string GenerateToken(string userId, string userName, IList<string> roles)
     {
-        // Configurar chave secreta
         var secretKey = _configuration["Jwt:Secret"];
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // Definir as claims do token
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, userId),
@@ -36,7 +34,6 @@ public class JwtTokenService : IJwtTokenService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        // Configurar o token
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),

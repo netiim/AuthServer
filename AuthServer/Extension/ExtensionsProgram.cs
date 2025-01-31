@@ -28,7 +28,30 @@ public static class ExtensionsProgram
 
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Description = "Digite 'Bearer {seu_token_jwt}' para autenticar",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            };
 
+            c.AddSecurityDefinition("Bearer", securityScheme);
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    securityScheme,
+                    Array.Empty<string>()
+                }
+            });
             c.IncludeXmlComments(xmlPath);
             
         });
@@ -43,8 +66,7 @@ public static class ExtensionsProgram
 
         return services;
     }
-
-    public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<IdentityOptions>(options =>
         {
@@ -52,34 +74,41 @@ public static class ExtensionsProgram
             options.Lockout.MaxFailedAccessAttempts = 3;
             options.Lockout.AllowedForNewUsers = true;
         });
+
         services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
             options.SignIn.RequireConfirmedAccount = false;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders()
-        .AddSignInManager(); 
+        .AddDefaultTokenProviders();
 
-        services.ConfigureApplicationCookie(options =>
+        var key = Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]);
+
+        services.AddAuthentication(options =>
         {
-            options.Cookie.HttpOnly = true;
-            options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-            options.LoginPath = "/auth/login";
-            options.LogoutPath = "/auth/logout";
-            options.AccessDeniedPath = "/auth/access-denied";
-            options.SlidingExpiration = true;
-
-            options.Events.OnRedirectToLogin = context =>
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false; 
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return Task.CompletedTask;
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidAudience = configuration["Jwt:Audience"],
+                ClockSkew = TimeSpan.Zero 
             };
         });
+
         return services;
     }
     public static IServiceCollection AddFluentValidation(this IServiceCollection services)
     {
-
         return services;
     }
 }
