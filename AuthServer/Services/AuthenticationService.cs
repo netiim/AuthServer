@@ -2,6 +2,7 @@
 using AuthServer.Models.DTO;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using static AuthServer.Services.IdentityRoles;
 
 namespace AuthServer.Services
@@ -29,38 +30,38 @@ namespace AuthServer.Services
         {
             var user = new ApplicationUser
             {
-                UserName = request.UserName,
+                UserName = request.Email,
                 Email = request.Email
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
+
+            var roles = Enum.GetValues<UserRoles>().Select(e => e.ToString()).ToList();
+            await _userManager.AddToRolesAsync(user, roles);
+
 
             return result;
         }
-        public async Task<IdentityResult> RegisterPaciente(RegisterPacienteDTO request)
+        private async Task<bool> SaveTokenAsync(ApplicationUser user, string token)
         {
-            var user = new ApplicationUser
+            try
             {
-                UserName = request.UserName,
-                Email = request.Email
-            };
+                var existingToken = await _userManager.GetAuthenticationTokenAsync(user, "JWT", "AccessToken");
 
-            var result = await _userManager.CreateAsync(user, request.Password);
-            if (!result.Succeeded) return result;
+                if (!string.IsNullOrEmpty(existingToken))
+                {
+                    // Remove o token anterior (se houver) para evitar duplicatas
+                    await _userManager.RemoveAuthenticationTokenAsync(user, "JWT", "AccessToken");
+                }
 
-            await _userManager.AddToRoleAsync(user, nameof(UserRoles.Paciente));
-
-            var paciente = new Paciente
+                // Salva o novo token
+                await _userManager.SetAuthenticationTokenAsync(user, "JWT", "AccessToken", token);
+                return true;
+            }
+            catch
             {
-                Id = user.Id,
-                DataNascimento = request.DataNascimento,
-                User = user
-            };
-
-            DbContext.Pacientes.Add(paciente);
-            await DbContext.SaveChangesAsync();
-
-            return result;
+                return false;
+            }
         }
         public async Task<string?> Login(LoginUserDTO request)
         {
@@ -75,21 +76,20 @@ namespace AuthServer.Services
 
             var token = _jwtTokenService.GenerateToken(user.Id, user.UserName, roles);
 
+            var tokenSaved = await SaveTokenAsync(user, token);
+
+            if (!tokenSaved) throw new Exception("Erro ao salvar o token.");
+
             return token;
         }
-        public async Task<IEnumerable<Paciente>> GetAllPacientes()
-        {
-            return await DbContext.Pacientes.Include(p => p.User).ToListAsync();
-        }
 
-        public async Task<Paciente> GetPacienteById(string id)
+        public async Task Logout(ClaimsPrincipal userLogado)
         {
-            return await DbContext.Pacientes.Include(p => p.User)
-                .FirstOrDefaultAsync(p => p.Id == id);
-        }
-        public Task<IdentityResult> RegisterMedico(RegisterMedicoDTO request)
-        {
-            throw new NotImplementedException();
+            var user = await _userManager.GetUserAsync(userLogado);
+
+            if (user == null) throw new Exception("Ocorreu um problema para deslogar usuário não encontrado.");
+
+            await _userManager.RemoveAuthenticationTokenAsync(user, "JWT", "AccessToken");
         }
     }
 }

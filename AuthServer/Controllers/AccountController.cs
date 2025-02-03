@@ -17,50 +17,21 @@ namespace AuthServer.Controllers
         {
             _authentication = authentication;
         }
-
         [Authorize]
-        [HttpGet("pacientes")]
-        public async Task<IActionResult> GetPacientes()
+        [HttpGet("validar-token")]
+        public async Task<IActionResult> Valida()
         {
-            var pacientes = await _authentication.GetAllPacientes();
-            return Ok(pacientes);
+            return Ok();
         }
-
-        [HttpGet("pacientes/{id}")]
-        public async Task<IActionResult> GetPacienteById(string id)
-        {
-            var paciente = await _authentication.GetPacienteById(id);
-            if (paciente == null)
-                return NotFound("Paciente não encontrado.");
-
-            return Ok(paciente);
-        }
-        [HttpPost("register-medico")]
-        public async Task<IActionResult> RegisterMedico([FromBody] RegisterMedicoDTO request)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] CreateUserDTO request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _authentication.RegisterMedico(request);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
-
-            return Ok("Médico registrado com sucesso!");
-        }
-
-        [HttpPost("register-paciente")]
-        public async Task<IActionResult> RegisterPaciente([FromBody] RegisterPacienteDTO request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var result = await _authentication.RegisterPaciente(request);
+            var result = await _authentication.Register(request);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);
@@ -79,7 +50,7 @@ namespace AuthServer.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message); 
+                return BadRequest(e.Message);
             }
         }
 
@@ -87,7 +58,8 @@ namespace AuthServer.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+            await _authentication.Logout(User);
+
             return Ok(new { message = "Logout realizado com sucesso!" });
         }
     }
